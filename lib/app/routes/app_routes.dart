@@ -21,6 +21,7 @@ abstract class Routes {
   static const JOB_ALERT = _Paths.JOB_ALERT;
   static const INTERVIEW = _Paths.INTERVIEW;
   static const MESSAGE = _Paths.MESSAGE;
+  static const CAREER_COACH = _Paths.CAREER_COACH;
   static const JOB_DETAIL = _Paths.JOB_DETAIL;
   static const APPLICATION_DETAIL = _Paths.APPLICATION_DETAIL;
   static const PROFILE_EDIT = _Paths.PROFILE_EDIT;
@@ -55,6 +56,7 @@ abstract class _Paths {
   static const JOB_ALERT = '/job-alert';
   static const INTERVIEW = '/interview';
   static const MESSAGE = '/message';
+  static const CAREER_COACH = '/career-coach';
   static const JOB_DETAIL = '/job-detail';
   static const APPLICATION_DETAIL = '/application-detail';
   static const PROFILE_EDIT = '/profile-edit';
