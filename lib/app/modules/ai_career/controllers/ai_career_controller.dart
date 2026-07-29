@@ -46,6 +46,7 @@ class AiCareerController extends GetxController {
       title: 'AI Interview Practice',
       description: 'Latihan wawancara sesuai posisi yang kamu incar.',
       endpoint: 'POST /ai-interviews/practice',
+      route: Routes.AI_INTERVIEW,
     ),
     AiFeature(
       icon: Iconsax.messages_2,

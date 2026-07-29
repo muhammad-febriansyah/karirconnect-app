@@ -16,6 +16,8 @@ abstract class Routes {
   static const SALARY_INSIGHT = _Paths.SALARY_INSIGHT;
   static const SKILL_ASSESSMENT = _Paths.SKILL_ASSESSMENT;
   static const SKILL_ASSESSMENT_QUIZ = _Paths.SKILL_ASSESSMENT_QUIZ;
+  static const AI_INTERVIEW = _Paths.AI_INTERVIEW;
+  static const AI_INTERVIEW_RUN = _Paths.AI_INTERVIEW_RUN;
   static const COMPANY_BROWSE = _Paths.COMPANY_BROWSE;
   static const CAREER_RESOURCE = _Paths.CAREER_RESOURCE;
   static const SAVED_JOB = _Paths.SAVED_JOB;
@@ -53,6 +55,8 @@ abstract class _Paths {
   static const SALARY_INSIGHT = '/salary-insight';
   static const SKILL_ASSESSMENT = '/skill-assessment';
   static const SKILL_ASSESSMENT_QUIZ = '/skill-assessment/quiz';
+  static const AI_INTERVIEW = '/ai-interview';
+  static const AI_INTERVIEW_RUN = '/ai-interview/run';
   static const COMPANY_BROWSE = '/company-browse';
   static const CAREER_RESOURCE = '/career-resource';
   static const SAVED_JOB = '/saved-job';
