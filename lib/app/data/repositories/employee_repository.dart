@@ -268,8 +268,55 @@ class EmployeeRepository with ApiRequestMixin {
 
   /// `POST api/v1/profile`. `is_open_to_work` and `visibility` are required by
   /// `ProfileUpdateRequest`, so they are always sent.
-  Future<void> updateProfile(Map<String, dynamic> payload) =>
-      send(() => _api.post<Map<String, dynamic>>('/profile', data: payload));
+  ///
+  /// **Replaces the whole record**, so [payload] must carry every field the
+  /// form loaded, not just the changed ones. When [avatarPath] is set the call
+  /// switches to multipart — every scalar field rides alongside the file, so
+  /// the record is still fully specified.
+  Future<void> updateProfile(
+    Map<String, dynamic> payload, {
+    String? avatarPath,
+  }) {
+    if (avatarPath == null) {
+      return send(
+        () => _api.post<Map<String, dynamic>>('/profile', data: payload),
+      );
+    }
+
+    final form = FormData.fromMap({
+      // The profile payload is flat scalars, so each rides as a string field.
+      // Booleans must become '1'/'0' — Laravel's `boolean` rule rejects the
+      // strings 'true'/'false'. Nulls are dropped rather than sent literally.
+      for (final entry in payload.entries)
+        if (entry.value != null)
+          entry.key: entry.value is bool
+              ? (entry.value == true ? '1' : '0')
+              : '${entry.value}',
+      'avatar': MultipartFile.fromFileSync(
+        avatarPath,
+        filename: avatarPath.split('/').last,
+      ),
+    });
+
+    return send(() => _api.post<Map<String, dynamic>>('/profile', data: form));
+  }
+
+  /// `POST api/v1/companies/{slug}/reviews`. The server queues the review for
+  /// moderation and 422s (`review_rejected`) when the candidate has no
+  /// verified tie to the company.
+  Future<void> submitReview(String slug, Map<String, dynamic> payload) =>
+      send(() => _api.post<Map<String, dynamic>>(
+            '/companies/$slug/reviews',
+            data: payload,
+          ));
+
+  /// `POST api/v1/salary-submissions`. Also moderated before it reaches the
+  /// public aggregate.
+  Future<void> submitSalary(Map<String, dynamic> payload) =>
+      send(() => _api.post<Map<String, dynamic>>(
+            '/salary-submissions',
+            data: payload,
+          ));
 
   // ---- Educations ---------------------------------------------------------
 

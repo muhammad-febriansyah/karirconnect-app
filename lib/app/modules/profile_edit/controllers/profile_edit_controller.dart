@@ -1,3 +1,6 @@
+import 'dart:typed_data';
+
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 
@@ -7,6 +10,7 @@ import '../../../data/models/meta_model.dart';
 import '../../../data/providers/api_exception.dart';
 import '../../../data/repositories/catalog_repository.dart';
 import '../../../data/repositories/employee_repository.dart';
+import '../../../data/services/auth_service.dart';
 import '../../profile/controllers/profile_controller.dart';
 
 class ProfileEditController extends GetxController {
@@ -28,8 +32,22 @@ class ProfileEditController extends GetxController {
     (value: 'female', label: 'Perempuan'),
   ];
 
+  /// `ProfileUpdateRequest` caps the avatar at 4 MB, jpg/png/webp.
+  static const int _avatarMaxBytes = 4 * 1024 * 1024;
+  static const List<String> _avatarExtensions = ['jpg', 'jpeg', 'png', 'webp'];
+
   final EmployeeRepository _repository;
   final CatalogRepository _catalog;
+  final AuthService _auth = Get.find<AuthService>();
+
+  /// A newly picked local avatar. [avatarPath] uploads (mobile has a file
+  /// path); [avatarBytes] previews (works on every platform, unlike a
+  /// `dart:io` File which would break the web build).
+  final avatarPath = RxnString();
+  final avatarBytes = Rxn<Uint8List>();
+
+  String? get currentAvatarUrl => _auth.user.value?.avatarUrl;
+  String? get userName => _auth.user.value?.name;
 
   final headlineController = TextEditingController();
   final aboutController = TextEditingController();
@@ -112,6 +130,35 @@ class ProfileEditController extends GetxController {
   String? _dateOfBirth;
   int? _cityId;
 
+  /// Pick a new avatar. Size is checked here so an oversized image fails
+  /// instantly rather than after the whole profile round-trips.
+  Future<void> pickAvatar() async {
+    final picked = await FilePicker.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: _avatarExtensions,
+      // Bytes for the cross-platform preview; the path is what actually
+      // uploads on mobile.
+      withData: true,
+    );
+
+    final file = picked?.files.singleOrNull;
+    final path = file?.path;
+    if (file == null || path == null) {
+      if (file != null && file.path == null) {
+        AppToast.info('Ganti foto belum didukung di web.');
+      }
+      return;
+    }
+
+    if (file.size > _avatarMaxBytes) {
+      AppToast.error('Ukuran foto maksimal 4 MB.');
+      return;
+    }
+
+    avatarPath.value = path;
+    avatarBytes.value = file.bytes;
+  }
+
   Future<void> save() async {
     if (isSaving.value) return;
 
@@ -125,22 +172,25 @@ class ProfileEditController extends GetxController {
       final linkedin = linkedinController.text.trim();
       final github = githubController.text.trim();
 
-      await _repository.updateProfile({
-        // Both are `required` in ProfileUpdateRequest.
-        'is_open_to_work': isOpenToWork.value,
-        'visibility': visibility.value,
-        if (headline.isNotEmpty) 'headline': headline,
-        if (about.isNotEmpty) 'about': about,
-        if (position.isNotEmpty) 'current_position': position,
-        if (portfolio.isNotEmpty) 'portfolio_url': portfolio,
-        if (linkedin.isNotEmpty) 'linkedin_url': linkedin,
-        if (github.isNotEmpty) 'github_url': github,
-        'gender': ?gender.value,
-        'experience_level': ?experienceLevel.value,
-        'province_id': ?provinceId.value,
-        'date_of_birth': ?_dateOfBirth,
-        'city_id': ?_cityId,
-      });
+      await _repository.updateProfile(
+        {
+          // Both are `required` in ProfileUpdateRequest.
+          'is_open_to_work': isOpenToWork.value,
+          'visibility': visibility.value,
+          if (headline.isNotEmpty) 'headline': headline,
+          if (about.isNotEmpty) 'about': about,
+          if (position.isNotEmpty) 'current_position': position,
+          if (portfolio.isNotEmpty) 'portfolio_url': portfolio,
+          if (linkedin.isNotEmpty) 'linkedin_url': linkedin,
+          if (github.isNotEmpty) 'github_url': github,
+          'gender': ?gender.value,
+          'experience_level': ?experienceLevel.value,
+          'province_id': ?provinceId.value,
+          'date_of_birth': ?_dateOfBirth,
+          'city_id': ?_cityId,
+        },
+        avatarPath: avatarPath.value,
+      );
 
       AppToast.success('Profil disimpan.');
 

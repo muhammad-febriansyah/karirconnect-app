@@ -3,16 +3,18 @@ import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:iconsax/iconsax.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/formatters.dart';
 import '../../../core/values/app_colors.dart';
 import '../../../core/widgets/form_fields.dart';
 import '../../../core/widgets/gradient_header.dart';
 import '../../../core/widgets/states.dart';
 import '../controllers/profile_edit_controller.dart';
 
-/// `POST api/v1/profile`. Avatar upload is left out — it needs multipart and a
-/// file picker, neither of which this client has yet.
+/// `POST api/v1/profile`, now carrying the avatar too — the whole-record
+/// replace rides as multipart when a new photo is picked.
 class ProfileEditView extends GetView<ProfileEditController> {
   const ProfileEditView({super.key});
 
@@ -64,6 +66,8 @@ class _Body extends GetView<ProfileEditController> {
           AppSpacing.xl.h,
         ),
         children: [
+            const _AvatarPicker(),
+            SizedBox(height: AppSpacing.xl.h),
             LabeledField(
               label: 'Headline',
               controller: controller.headlineController,
@@ -165,4 +169,83 @@ class _Body extends GetView<ProfileEditController> {
         );
       });
   }
+}
+
+class _AvatarPicker extends GetView<ProfileEditController> {
+  const _AvatarPicker();
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        children: [
+          Obx(() {
+            final bytes = controller.avatarBytes.value;
+            final url = controller.currentAvatarUrl;
+
+            return Stack(
+              children: [
+                Container(
+                  width: 96.w,
+                  height: 96.w,
+                  decoration: const BoxDecoration(
+                    color: AppColors.accent,
+                    shape: BoxShape.circle,
+                  ),
+                  clipBehavior: Clip.antiAlias,
+                  alignment: Alignment.center,
+                  child: bytes != null
+                      ? Image.memory(bytes, fit: BoxFit.cover,
+                          width: 96.w, height: 96.w)
+                      : (url != null && url.isNotEmpty)
+                          ? Image.network(url, fit: BoxFit.cover,
+                              width: 96.w, height: 96.w,
+                              errorBuilder: (_, _, _) => _initials())
+                          : _initials(),
+                ),
+                Positioned(
+                  right: 0,
+                  bottom: 0,
+                  child: Material(
+                    color: AppColors.primary,
+                    shape: const CircleBorder(),
+                    child: InkWell(
+                      onTap: controller.pickAvatar,
+                      customBorder: const CircleBorder(),
+                      child: Padding(
+                        padding: EdgeInsets.all(7.w),
+                        child: Icon(Iconsax.camera, size: 15.sp,
+                            color: Colors.white),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            );
+          }),
+          SizedBox(height: AppSpacing.sm.h),
+          TextButton(
+            onPressed: controller.pickAvatar,
+            child: Text(
+              'Ubah foto',
+              style: GoogleFonts.poppins(
+                fontSize: 12.sp,
+                fontWeight: FontWeight.w600,
+                color: AppColors.primary,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _initials() => Text(
+        Formatters.initials(controller.userName),
+        style: GoogleFonts.poppins(
+          fontSize: 28.sp,
+          fontWeight: FontWeight.w700,
+          color: AppColors.primary,
+        ),
+      );
 }

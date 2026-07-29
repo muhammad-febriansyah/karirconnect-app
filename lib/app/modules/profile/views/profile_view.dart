@@ -62,6 +62,16 @@ class _ProfileHeader extends GetView<ProfileController> {
         children: [
           Obx(() {
             final user = controller.user;
+            final avatar = user?.avatarUrl;
+
+            final initials = Text(
+              Formatters.initials(user?.name),
+              style: GoogleFonts.poppins(
+                fontSize: 19.sp,
+                fontWeight: FontWeight.w700,
+                color: Colors.white,
+              ),
+            );
 
             return Container(
               width: 58.w,
@@ -70,15 +80,17 @@ class _ProfileHeader extends GetView<ProfileController> {
                 color: Colors.white.withValues(alpha: 0.18),
                 shape: BoxShape.circle,
               ),
+              clipBehavior: Clip.antiAlias,
               alignment: Alignment.center,
-              child: Text(
-                Formatters.initials(user?.name),
-                style: GoogleFonts.poppins(
-                  fontSize: 19.sp,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.white,
-                ),
-              ),
+              child: avatar == null || avatar.isEmpty
+                  ? initials
+                  : Image.network(
+                      avatar,
+                      fit: BoxFit.cover,
+                      width: 58.w,
+                      height: 58.w,
+                      errorBuilder: (_, _, _) => initials,
+                    ),
             );
           }),
           SizedBox(width: AppSpacing.lg.w),

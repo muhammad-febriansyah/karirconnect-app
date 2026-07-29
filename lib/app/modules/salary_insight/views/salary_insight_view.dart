@@ -12,6 +12,7 @@ import '../../../core/widgets/gradient_header.dart';
 import '../../../core/widgets/states.dart';
 import '../../../data/models/salary_insight_model.dart';
 import '../controllers/salary_insight_controller.dart';
+import 'widgets/salary_submit_sheet.dart';
 
 /// `GET api/v1/salary-insights` — public, so this screen works signed out.
 class SalaryInsightView extends GetView<SalaryInsightController> {
@@ -25,6 +26,25 @@ class SalaryInsightView extends GetView<SalaryInsightController> {
       ),
       child: Scaffold(
         backgroundColor: AppColors.background,
+        floatingActionButton: FloatingActionButton.extended(
+          onPressed: () {
+            if (!controller.isLoggedIn) {
+              controller.requireLogin();
+              return;
+            }
+            SalarySubmitSheet.show(context, controller);
+          },
+          backgroundColor: AppColors.primary,
+          foregroundColor: Colors.white,
+          icon: const Icon(Iconsax.add),
+          label: Text(
+            'Bagikan data',
+            style: GoogleFonts.poppins(
+              fontSize: 13.sp,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
         body: Column(
           children: [
             const GradientHeaderBar(
