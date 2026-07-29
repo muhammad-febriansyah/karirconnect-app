@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/values/app_colors.dart';
+import '../../../../core/widgets/form_fields.dart';
 import '../../../../data/models/job_alert_model.dart';
 import '../../../../data/models/meta_model.dart';
 import '../../controllers/job_alert_controller.dart';
@@ -106,46 +107,16 @@ class _JobAlertFormSheetState extends State<JobAlertFormSheet> {
   Widget build(BuildContext context) {
     final meta = widget.controller.meta.value;
 
-    return Container(
-      constraints: BoxConstraints(maxHeight: 0.88.sh),
-      decoration: BoxDecoration(
-        color: AppColors.background,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(22.r)),
-      ),
-      padding: EdgeInsets.fromLTRB(20.w, 10.h, 20.w, 0),
-      child: SafeArea(
-        top: false,
-        child: Form(
-          key: _formKey,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(
-                child: Container(
-                  width: 38.w,
-                  height: 4.h,
-                  decoration: BoxDecoration(
-                    color: AppColors.border,
-                    borderRadius: BorderRadius.circular(4.r),
-                  ),
-                ),
-              ),
-              SizedBox(height: 16.h),
-              Text(
-                widget.existing == null ? 'Alert baru' : 'Ubah alert',
-                style: GoogleFonts.poppins(
-                  fontSize: 15.sp,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.brandNavy,
-                ),
-              ),
-              SizedBox(height: 14.h),
-              Flexible(
-                child: SingleChildScrollView(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
+    return FormSheetShell(
+      title: widget.existing == null ? 'Alert baru' : 'Ubah alert',
+      submitLabel:
+          widget.existing == null ? 'Buat alert' : 'Simpan perubahan',
+      onSubmit: _submit,
+      child: Form(
+        key: _formKey,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
                       _Field(
                         label: 'Nama alert',
                         controller: _nameController,
@@ -250,23 +221,7 @@ class _JobAlertFormSheetState extends State<JobAlertFormSheet> {
                           ),
                         ),
                       ),
-                    ],
-                  ),
-                ),
-              ),
-              SizedBox(height: 12.h),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: _submit,
-                  child: Text(
-                    widget.existing == null ? 'Buat alert' : 'Simpan perubahan',
-                  ),
-                ),
-              ),
-              SizedBox(height: 12.h),
-            ],
-          ),
+          ],
         ),
       ),
     );
@@ -363,7 +318,7 @@ class _OptionGroup extends StatelessWidget {
               final active = selected == option.value;
 
               return Material(
-                color: active ? AppColors.primary : AppColors.muted,
+                color: active ? AppColors.primary : AppColors.surfaceSoft,
                 borderRadius: BorderRadius.circular(AppRadius.control),
                 child: InkWell(
                   onTap: () => onSelected(

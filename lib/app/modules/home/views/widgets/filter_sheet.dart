@@ -140,7 +140,7 @@ class _Group extends StatelessWidget {
               final active = selected == option.value;
 
               return Material(
-                color: active ? AppColors.primary : AppColors.muted,
+                color: active ? AppColors.primary : AppColors.surfaceSoft,
                 borderRadius: BorderRadius.circular(AppRadius.control),
                 child: InkWell(
                   // Tapping the active option clears it.
