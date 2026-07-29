@@ -12,7 +12,9 @@ import '../../../core/widgets/gradient_header.dart';
 import '../../../core/widgets/job_card.dart';
 import '../../../core/widgets/states.dart';
 import '../../../data/models/company_detail_model.dart';
+import '../../../routes/app_pages.dart';
 import '../controllers/company_detail_controller.dart';
+import 'widgets/review_sheet.dart';
 
 /// `GET api/v1/companies/{slug}` plus its jobs and reviews. All public.
 class CompanyDetailView extends GetView<CompanyDetailController> {
@@ -125,18 +127,48 @@ class _Body extends GetView<CompanyDetailController> {
                 ),
               ),
             ],
+            SizedBox(height: AppSpacing.section.h),
+            _ReviewHeader(
+              total: controller.reviewTotal.value,
+              avgRating: controller.avgRating.value,
+            ),
+            SizedBox(height: AppSpacing.md.h),
+            const _WriteReviewButton(),
             if (reviews.isNotEmpty) ...[
-              SizedBox(height: 22.h),
-              _ReviewHeader(
-                total: controller.reviewTotal.value,
-                avgRating: controller.avgRating.value,
-              ),
-              SizedBox(height: 10.h),
+              SizedBox(height: AppSpacing.md.h),
               ...reviews.map((review) => _ReviewCard(review: review)),
             ],
           ],
         );
       });
+  }
+}
+
+class _WriteReviewButton extends GetView<CompanyDetailController> {
+  const _WriteReviewButton();
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: double.infinity,
+      child: OutlinedButton.icon(
+        onPressed: () {
+          if (!controller.isLoggedIn) {
+            Get.toNamed(Routes.LOGIN);
+            return;
+          }
+          ReviewSheet.show(context, controller);
+        },
+        icon: Icon(Iconsax.edit_2, size: 16.sp),
+        label: Text(
+          'Tulis review',
+          style: GoogleFonts.poppins(
+            fontSize: 12.5.sp,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+    );
   }
 }
 

@@ -30,8 +30,12 @@ class CompanyDetailController extends GetxController {
   final avgRating = 0.0.obs;
 
   final isLoading = true.obs;
+  final isReviewing = false.obs;
   final errorMessage = RxnString();
   final savedSlugs = <String>{}.obs;
+
+  bool get isLoggedIn => _auth.isLoggedIn;
+  String get companyName => detail.value?.company.name ?? 'perusahaan ini';
 
   @override
   void onInit() {
@@ -87,6 +91,25 @@ class CompanyDetailController extends GetxController {
 
   void openJob(JobModel job) =>
       Get.toNamed(Routes.JOB_DETAIL, arguments: job.slug);
+
+  /// Returns true on success so the sheet can close itself. A rejected review
+  /// (no verified tie to the company) 422s and the message is surfaced.
+  Future<bool> submitReview(Map<String, dynamic> payload) async {
+    if (isReviewing.value) return false;
+    isReviewing.value = true;
+
+    try {
+      await _employee.submitReview(slug, payload);
+      await _loadReviews();
+      AppToast.success('Review terkirim. Akan ditinjau sebelum tayang.');
+      return true;
+    } on ApiException catch (error) {
+      AppToast.error(error.message);
+      return false;
+    } finally {
+      isReviewing.value = false;
+    }
+  }
 
   Future<void> toggleSave(JobModel job) async {
     if (!_auth.isLoggedIn) {
