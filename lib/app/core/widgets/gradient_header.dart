@@ -42,6 +42,142 @@ class GradientHeader extends StatelessWidget {
   }
 }
 
+/// A [GradientHeader] pre-laid for a *pushed* page: a back circle on the left,
+/// a title (and optional subtitle) beside it, and optional trailing actions.
+///
+/// This is the counterpart to the freeform [GradientHeader] the tabs use. Every
+/// screen reached by `Get.toNamed` should wear this instead of a white `AppBar`
+/// so a detail page still reads as the same app as the tab that opened it.
+class GradientHeaderBar extends StatelessWidget {
+  const GradientHeaderBar({
+    super.key,
+    required this.title,
+    this.subtitle,
+    this.onBack,
+    this.actions = const [],
+    this.bottom,
+  });
+
+  final String title;
+  final String? subtitle;
+
+  /// Defaults to `Get.back`-style pop via the Navigator when null.
+  final VoidCallback? onBack;
+
+  /// Trailing controls, right-aligned. Use [HeaderCircleButton] for parity with
+  /// the back control.
+  final List<Widget> actions;
+
+  /// Extra content under the title row — a search field, a stat strip. Sits
+  /// inside the same gradient block, above the sheet.
+  final Widget? bottom;
+
+  @override
+  Widget build(BuildContext context) {
+    return GradientHeader(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            children: [
+              HeaderCircleButton(
+                icon: Iconsax.arrow_left_2,
+                label: 'Kembali',
+                onTap: onBack ?? () => Navigator.of(context).maybePop(),
+              ),
+              SizedBox(width: AppSpacing.md.w),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.poppins(
+                        fontSize: 17.sp,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                        letterSpacing: -0.3,
+                      ),
+                    ),
+                    if (subtitle != null) ...[
+                      SizedBox(height: 1.h),
+                      Text(
+                        subtitle!,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.poppins(
+                          fontSize: 11.5.sp,
+                          color: Colors.white.withValues(alpha: 0.7),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              for (final action in actions) ...[
+                SizedBox(width: AppSpacing.sm.w),
+                action,
+              ],
+            ],
+          ),
+          if (bottom != null) ...[
+            SizedBox(height: AppSpacing.xl.h),
+            bottom!,
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+/// The translucent-white circle used for header controls (back, save, bell) on
+/// the gradient — sized to the 44pt minimum rather than to the glyph.
+class HeaderCircleButton extends StatelessWidget {
+  const HeaderCircleButton({
+    super.key,
+    required this.icon,
+    required this.label,
+    required this.onTap,
+    this.active = false,
+  });
+
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  /// Tints the glyph with the brand cyan when it reflects an on-state.
+  final bool active;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      label: label,
+      child: Material(
+        color: Colors.white.withValues(alpha: 0.16),
+        borderRadius: BorderRadius.circular(AppRadius.control),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(AppRadius.control),
+          child: SizedBox(
+            width: 44.w,
+            height: 44.w,
+            child: Icon(
+              icon,
+              size: 20.sp,
+              color: active ? AppColors.brandCyan : Colors.white,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 /// The white content sheet that rises over a [GradientHeader].
 ///
 /// The overlap is painted, not translated: the sheet is backed by the header

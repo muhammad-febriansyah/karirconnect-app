@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -7,6 +8,7 @@ import 'package:iconsax/iconsax.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/values/app_colors.dart';
+import '../../../core/widgets/gradient_header.dart';
 import '../../../core/widgets/states.dart';
 import '../../../data/models/cv_model.dart';
 import '../controllers/cv_controller.dart';
@@ -18,21 +20,13 @@ class CvView extends GetView<CvController> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: const Text('CV Saya'),
-        backgroundColor: AppColors.background,
-        surfaceTintColor: Colors.transparent,
-        actions: [
-          IconButton(
-            onPressed: controller.openBuilder,
-            tooltip: 'CV Builder',
-            icon: Icon(Iconsax.magicpen, size: 20.sp, color: AppColors.primary),
-          ),
-        ],
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle.light.copyWith(
+        statusBarColor: Colors.transparent,
       ),
-      floatingActionButton: Obx(
+      child: Scaffold(
+        backgroundColor: AppColors.background,
+        floatingActionButton: Obx(
         () => FloatingActionButton.extended(
           onPressed:
               controller.isUploading.value ? null : controller.pickAndUpload,
@@ -57,11 +51,27 @@ class CvView extends GetView<CvController> {
           ),
         ),
       ),
-      body: RefreshIndicator(
-        onRefresh: controller.load,
-        color: AppColors.primary,
-        child: Obx(() {
-          if (controller.isLoading.value) return const SectionLoader();
+        body: Column(
+          children: [
+            GradientHeaderBar(
+              title: 'CV Saya',
+              subtitle: 'Kelola CV yang dilampirkan saat melamar',
+              actions: [
+                HeaderCircleButton(
+                  icon: Iconsax.magicpen,
+                  label: 'CV Builder',
+                  onTap: controller.openBuilder,
+                ),
+              ],
+            ),
+            Expanded(
+              child: RefreshIndicator(
+                onRefresh: controller.load,
+                color: AppColors.primary,
+                child: Obx(() {
+                  if (controller.isLoading.value) {
+                    return const SectionLoader();
+                  }
 
           final error = controller.errorMessage.value;
           if (error != null) {
@@ -91,16 +101,21 @@ class CvView extends GetView<CvController> {
             );
           }
 
-          return ListView.separated(
-            padding: EdgeInsets.fromLTRB(18.w, 8.h, 18.w, 90.h),
-            itemCount: items.length,
-            separatorBuilder: (_, _) => SizedBox(height: 12.h),
-            itemBuilder: (context, index) => _CvCard(
-              cv: items[index],
-              controller: controller,
+                  return ListView.separated(
+                    padding:
+                        EdgeInsets.fromLTRB(AppSpacing.gutter.w, AppSpacing.xl.h, AppSpacing.gutter.w, 90.h),
+                    itemCount: items.length,
+                    separatorBuilder: (_, _) => SizedBox(height: AppSpacing.md.h),
+                    itemBuilder: (context, index) => _CvCard(
+                      cv: items[index],
+                      controller: controller,
+                    ),
+                  );
+                }),
+              ),
             ),
-          );
-        }),
+          ],
+        ),
       ),
     );
   }

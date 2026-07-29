@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -7,6 +8,7 @@ import 'package:iconsax/iconsax.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/values/app_colors.dart';
+import '../../../core/widgets/gradient_header.dart';
 import '../../../core/widgets/states.dart';
 import '../../../data/models/application_detail_model.dart';
 import '../controllers/application_detail_controller.dart';
@@ -17,32 +19,50 @@ class ApplicationDetailView extends GetView<ApplicationDetailController> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: const Text('Detail Lamaran'),
-        backgroundColor: AppColors.background,
-        surfaceTintColor: Colors.transparent,
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle.light.copyWith(
+        statusBarColor: Colors.transparent,
       ),
-      body: Obx(() {
-        if (controller.isLoading.value) return const SectionLoader();
-
-        final error = controller.errorMessage.value;
-        if (error != null) {
-          return ListView(
-            padding: EdgeInsets.all(18.w),
-            children: [ErrorState(message: error, onRetry: controller.load)],
-          );
-        }
-
-        final detail = controller.detail.value;
-        if (detail == null) {
-          return const EmptyState(message: 'Lamaran tidak ditemukan.');
-        }
-
-        return ListView(
-          padding: EdgeInsets.fromLTRB(18.w, 8.h, 18.w, 24.h),
+      child: Scaffold(
+        backgroundColor: AppColors.background,
+        body: Column(
           children: [
+            const GradientHeaderBar(title: 'Detail Lamaran'),
+            Expanded(child: _Body()),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _Body extends GetView<ApplicationDetailController> {
+  @override
+  Widget build(BuildContext context) {
+    return Obx(() {
+      if (controller.isLoading.value) return const SectionLoader();
+
+      final error = controller.errorMessage.value;
+      if (error != null) {
+        return ListView(
+          padding: EdgeInsets.all(AppSpacing.gutter.w),
+          children: [ErrorState(message: error, onRetry: controller.load)],
+        );
+      }
+
+      final detail = controller.detail.value;
+      if (detail == null) {
+        return const EmptyState(message: 'Lamaran tidak ditemukan.');
+      }
+
+      return ListView(
+        padding: EdgeInsets.fromLTRB(
+          AppSpacing.gutter.w,
+          AppSpacing.xl.h,
+          AppSpacing.gutter.w,
+          AppSpacing.xl.h,
+        ),
+        children: [
             _Summary(detail: detail),
             if (detail.coverLetter != null) ...[
               SizedBox(height: 16.h),
@@ -92,8 +112,7 @@ class ApplicationDetailView extends GetView<ApplicationDetailController> {
               ),
           ],
         );
-      }),
-    );
+      });
   }
 
   /// Withdrawing cannot be undone — the server treats withdrawn as terminal —

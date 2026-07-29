@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -7,6 +8,7 @@ import 'package:iconsax/iconsax.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/values/app_colors.dart';
+import '../../../core/widgets/gradient_header.dart';
 import '../../../core/widgets/states.dart';
 import '../../../data/models/career_resource_model.dart';
 import '../controllers/career_resource_controller.dart';
@@ -17,96 +19,92 @@ class CareerResourceView extends GetView<CareerResourceController> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: const Text('Artikel Karier'),
-        backgroundColor: AppColors.background,
-        surfaceTintColor: Colors.transparent,
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle.light.copyWith(
+        statusBarColor: Colors.transparent,
       ),
-      body: Column(
-        children: [
-          Padding(
-            padding: EdgeInsets.fromLTRB(18.w, 0, 18.w, 10.h),
-            child: TextField(
-              controller: controller.searchController,
-              style: GoogleFonts.poppins(
-                fontSize: 13.sp,
-                color: AppColors.foreground,
-              ),
-              decoration: InputDecoration(
+      child: Scaffold(
+        backgroundColor: AppColors.background,
+        body: Column(
+          children: [
+            GradientHeaderBar(
+              title: 'Artikel Karier',
+              bottom: HeaderSearchField(
+                controller: controller.searchController,
                 hintText: 'Cari artikel',
-                fillColor: AppColors.muted,
-                prefixIcon: Icon(
-                  Iconsax.search_normal_1,
-                  size: 18.sp,
-                  color: AppColors.mutedForeground,
-                ),
               ),
             ),
-          ),
-          const _CategoryChips(),
-          Expanded(
-            child: RefreshIndicator(
-              onRefresh: controller.load,
-              color: AppColors.primary,
-              child: Obx(() {
-                if (controller.isLoading.value) return const SectionLoader();
+            SizedBox(height: AppSpacing.lg.h),
+            const _CategoryChips(),
+            Expanded(
+              child: RefreshIndicator(
+                onRefresh: controller.load,
+                color: AppColors.primary,
+                child: Obx(() {
+                  if (controller.isLoading.value) return const SectionLoader();
 
-                final error = controller.errorMessage.value;
-                if (error != null) {
-                  return ListView(
-                    padding: EdgeInsets.all(18.w),
-                    children: [
-                      ErrorState(message: error, onRetry: controller.load),
-                    ],
+                  final gutter = EdgeInsets.fromLTRB(
+                    AppSpacing.gutter.w,
+                    AppSpacing.lg.h,
+                    AppSpacing.gutter.w,
+                    AppSpacing.xl.h,
                   );
-                }
 
-                final resources = controller.resources.toList();
-                if (resources.isEmpty) {
-                  return ListView(
-                    padding: EdgeInsets.all(18.w),
-                    children: const [
-                      EmptyState(
-                        icon: Iconsax.book_1,
-                        message: 'Belum ada artikel untuk filter ini.',
-                      ),
-                    ],
-                  );
-                }
-
-                final loadingMore = controller.isLoadingMore.value;
-
-                return ListView.separated(
-                  controller: controller.scrollController,
-                  padding: EdgeInsets.fromLTRB(18.w, 10.h, 18.w, 24.h),
-                  itemCount: resources.length + (loadingMore ? 1 : 0),
-                  separatorBuilder: (_, _) => SizedBox(height: 12.h),
-                  itemBuilder: (context, index) {
-                    if (index >= resources.length) {
-                      return Padding(
-                        padding: EdgeInsets.symmetric(vertical: 16.h),
-                        child: const Center(
-                          child: CircularProgressIndicator(
-                            color: AppColors.primary,
-                          ),
-                        ),
-                      );
-                    }
-
-                    final resource = resources[index];
-
-                    return _ArticleCard(
-                      resource: resource,
-                      onTap: () => controller.openResource(resource),
+                  final error = controller.errorMessage.value;
+                  if (error != null) {
+                    return ListView(
+                      padding: gutter,
+                      children: [
+                        ErrorState(message: error, onRetry: controller.load),
+                      ],
                     );
-                  },
-                );
-              }),
+                  }
+
+                  final resources = controller.resources.toList();
+                  if (resources.isEmpty) {
+                    return ListView(
+                      padding: gutter,
+                      children: const [
+                        EmptyState(
+                          icon: Iconsax.book_1,
+                          message: 'Belum ada artikel untuk filter ini.',
+                        ),
+                      ],
+                    );
+                  }
+
+                  final loadingMore = controller.isLoadingMore.value;
+
+                  return ListView.separated(
+                    controller: controller.scrollController,
+                    padding: gutter,
+                    itemCount: resources.length + (loadingMore ? 1 : 0),
+                    separatorBuilder: (_, _) => SizedBox(height: AppSpacing.md.h),
+                    itemBuilder: (context, index) {
+                      if (index >= resources.length) {
+                        return Padding(
+                          padding: EdgeInsets.symmetric(vertical: 16.h),
+                          child: const Center(
+                            child: CircularProgressIndicator(
+                              color: AppColors.primary,
+                            ),
+                          ),
+                        );
+                      }
+
+                      final resource = resources[index];
+
+                      return _ArticleCard(
+                        resource: resource,
+                        onTap: () => controller.openResource(resource),
+                      );
+                    },
+                  );
+                }),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

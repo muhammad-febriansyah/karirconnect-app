@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -7,6 +8,7 @@ import 'package:iconsax/iconsax.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/values/app_colors.dart';
+import '../../../core/widgets/gradient_header.dart';
 import '../../../core/widgets/states.dart';
 import '../../../data/models/interview_model.dart';
 import '../controllers/interview_controller.dart';
@@ -19,71 +21,87 @@ class InterviewView extends GetView<InterviewController> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: const Text('Interview'),
-        backgroundColor: AppColors.background,
-        surfaceTintColor: Colors.transparent,
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle.light.copyWith(
+        statusBarColor: Colors.transparent,
       ),
-      body: Column(
-        children: [
-          Padding(
-            padding: EdgeInsets.fromLTRB(18.w, 0, 18.w, 10.h),
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: Obx(
-                () => _FilterChip(
-                  active: controller.upcomingOnly.value,
-                  onTap: controller.toggleUpcoming,
+      child: Scaffold(
+        backgroundColor: AppColors.background,
+        body: Column(
+          children: [
+            const GradientHeaderBar(
+              title: 'Interview',
+              subtitle: 'Jadwal dan undangan wawancaramu',
+            ),
+            Padding(
+              padding: EdgeInsets.fromLTRB(
+                AppSpacing.gutter.w,
+                AppSpacing.lg.h,
+                AppSpacing.gutter.w,
+                0,
+              ),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Obx(
+                  () => _FilterChip(
+                    active: controller.upcomingOnly.value,
+                    onTap: controller.toggleUpcoming,
+                  ),
                 ),
               ),
             ),
-          ),
-          Expanded(
-            child: RefreshIndicator(
-              onRefresh: controller.load,
-              color: AppColors.primary,
-              child: Obx(() {
-                if (controller.isLoading.value) return const SectionLoader();
+            Expanded(
+              child: RefreshIndicator(
+                onRefresh: controller.load,
+                color: AppColors.primary,
+                child: Obx(() {
+                  if (controller.isLoading.value) return const SectionLoader();
 
-                final error = controller.errorMessage.value;
-                if (error != null) {
-                  return ListView(
-                    padding: EdgeInsets.all(18.w),
-                    children: [
-                      ErrorState(message: error, onRetry: controller.load),
-                    ],
+                  final gutter = EdgeInsets.fromLTRB(
+                    AppSpacing.gutter.w,
+                    AppSpacing.lg.h,
+                    AppSpacing.gutter.w,
+                    AppSpacing.xl.h,
                   );
-                }
 
-                final interviews = controller.interviews.toList();
-                if (interviews.isEmpty) {
-                  return ListView(
-                    padding: EdgeInsets.all(18.w),
-                    children: const [
-                      EmptyState(
-                        icon: Iconsax.calendar_2,
-                        message:
-                            'Belum ada jadwal interview. Undangan akan muncul di sini setelah perekrut menjadwalkanmu.',
-                      ),
-                    ],
+                  final error = controller.errorMessage.value;
+                  if (error != null) {
+                    return ListView(
+                      padding: gutter,
+                      children: [
+                        ErrorState(message: error, onRetry: controller.load),
+                      ],
+                    );
+                  }
+
+                  final interviews = controller.interviews.toList();
+                  if (interviews.isEmpty) {
+                    return ListView(
+                      padding: gutter,
+                      children: const [
+                        EmptyState(
+                          icon: Iconsax.calendar_2,
+                          message:
+                              'Belum ada jadwal interview. Undangan akan muncul di sini setelah perekrut menjadwalkanmu.',
+                        ),
+                      ],
+                    );
+                  }
+
+                  return ListView.separated(
+                    padding: gutter,
+                    itemCount: interviews.length,
+                    separatorBuilder: (_, _) => SizedBox(height: AppSpacing.md.h),
+                    itemBuilder: (context, index) => _InterviewCard(
+                      interview: interviews[index],
+                      controller: controller,
+                    ),
                   );
-                }
-
-                return ListView.separated(
-                  padding: EdgeInsets.fromLTRB(18.w, 4.h, 18.w, 24.h),
-                  itemCount: interviews.length,
-                  separatorBuilder: (_, _) => SizedBox(height: 12.h),
-                  itemBuilder: (context, index) => _InterviewCard(
-                    interview: interviews[index],
-                    controller: controller,
-                  ),
-                );
-              }),
+                }),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

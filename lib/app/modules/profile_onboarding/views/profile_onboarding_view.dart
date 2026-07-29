@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -7,6 +8,7 @@ import 'package:iconsax/iconsax.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/values/app_colors.dart';
 import '../../../core/widgets/form_fields.dart';
+import '../../../core/widgets/gradient_header.dart';
 import '../../../core/widgets/states.dart';
 import '../controllers/profile_onboarding_controller.dart';
 
@@ -17,47 +19,60 @@ class ProfileOnboardingView extends GetView<ProfileOnboardingController> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: const Text('Lengkapi Profil'),
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle.light.copyWith(
+        statusBarColor: Colors.transparent,
+      ),
+      child: Scaffold(
         backgroundColor: AppColors.background,
-        surfaceTintColor: Colors.transparent,
-        leading: IconButton(
-          onPressed: controller.back,
-          icon: const Icon(Iconsax.arrow_left_2),
+        bottomNavigationBar: const _Footer(),
+        body: Column(
+          children: [
+            GradientHeaderBar(
+              title: 'Lengkapi Profil',
+              subtitle: 'Tiga langkah agar siap melamar',
+              onBack: controller.back,
+            ),
+            Expanded(child: _Body()),
+          ],
         ),
       ),
-      bottomNavigationBar: const _Footer(),
-      body: Obx(() {
-        if (controller.isLoading.value) return const SectionLoader();
+    );
+  }
+}
 
-        final error = controller.errorMessage.value;
-        if (error != null) {
-          return ListView(
-            padding: EdgeInsets.all(18.w),
-            children: [ErrorState(message: error, onRetry: controller.onInit)],
-          );
-        }
+class _Body extends GetView<ProfileOnboardingController> {
+  @override
+  Widget build(BuildContext context) {
+    return Obx(() {
+      if (controller.isLoading.value) return const SectionLoader();
 
-        return Column(
-          children: [
-            const _StepBar(),
-            Expanded(
+      final error = controller.errorMessage.value;
+      if (error != null) {
+        return ListView(
+          padding: EdgeInsets.all(AppSpacing.gutter.w),
+          children: [ErrorState(message: error, onRetry: controller.onInit)],
+        );
+      }
+
+      return Column(
+        children: [
+          SizedBox(height: AppSpacing.lg.h),
+          const _StepBar(),
+          Expanded(
               // IndexedStack, not PageView: steps validate in order so swiping
               // is not wanted anyway, and a PageView pinned with
               // NeverScrollableScrollPhysics swallows the pointer-scroll events
               // its own children need — the step content could not be scrolled
               // at all, which hid the province and city pickers.
-              child: IndexedStack(
-                index: controller.currentStep.value,
-                children: const [_StepIdentity(), _StepCareer(), _StepReview()],
-              ),
+            child: IndexedStack(
+              index: controller.currentStep.value,
+              children: const [_StepIdentity(), _StepCareer(), _StepReview()],
             ),
-          ],
-        );
-      }),
-    );
+          ),
+        ],
+      );
+    });
   }
 }
 

@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../../core/theme/app_theme.dart';
 import '../../../core/values/app_colors.dart';
 import '../../../core/widgets/form_fields.dart';
+import '../../../core/widgets/gradient_header.dart';
 import '../../../core/widgets/states.dart';
 import '../controllers/profile_edit_controller.dart';
 
@@ -15,31 +18,52 @@ class ProfileEditView extends GetView<ProfileEditController> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: const Text('Ubah Profil'),
-        backgroundColor: AppColors.background,
-        surfaceTintColor: Colors.transparent,
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle.light.copyWith(
+        statusBarColor: Colors.transparent,
       ),
-      body: Obx(() {
-        if (controller.isLoading.value) return const SectionLoader();
-
-        final error = controller.errorMessage.value;
-        if (error != null) {
-          return ListView(
-            padding: EdgeInsets.all(18.w),
-            children: [
-              ErrorState(message: error, onRetry: controller.onInit),
-            ],
-          );
-        }
-
-        final meta = controller.meta.value;
-
-        return ListView(
-          padding: EdgeInsets.fromLTRB(18.w, 12.h, 18.w, 24.h),
+      child: Scaffold(
+        backgroundColor: AppColors.background,
+        body: Column(
           children: [
+            const GradientHeaderBar(
+              title: 'Ubah Profil',
+              subtitle: 'Perbarui data yang dilihat perekrut',
+            ),
+            Expanded(child: _Body()),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _Body extends GetView<ProfileEditController> {
+  @override
+  Widget build(BuildContext context) {
+    return Obx(() {
+      if (controller.isLoading.value) return const SectionLoader();
+
+      final error = controller.errorMessage.value;
+      if (error != null) {
+        return ListView(
+          padding: EdgeInsets.all(AppSpacing.gutter.w),
+          children: [
+            ErrorState(message: error, onRetry: controller.onInit),
+          ],
+        );
+      }
+
+      final meta = controller.meta.value;
+
+      return ListView(
+        padding: EdgeInsets.fromLTRB(
+          AppSpacing.gutter.w,
+          AppSpacing.xl.h,
+          AppSpacing.gutter.w,
+          AppSpacing.xl.h,
+        ),
+        children: [
             LabeledField(
               label: 'Headline',
               controller: controller.headlineController,
@@ -139,7 +163,6 @@ class ProfileEditView extends GetView<ProfileEditController> {
             ),
           ],
         );
-      }),
-    );
+      });
   }
 }

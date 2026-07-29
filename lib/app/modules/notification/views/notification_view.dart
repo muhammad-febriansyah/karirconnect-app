@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -7,6 +8,7 @@ import 'package:iconsax/iconsax.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/values/app_colors.dart';
+import '../../../core/widgets/gradient_header.dart';
 import '../../../core/widgets/states.dart';
 import '../../../data/models/notification_model.dart';
 import '../controllers/notification_controller.dart';
@@ -18,69 +20,63 @@ class NotificationView extends GetView<NotificationController> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: const Text('Notifikasi'),
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle.light.copyWith(
+        statusBarColor: Colors.transparent,
+      ),
+      child: Scaffold(
         backgroundColor: AppColors.background,
-        surfaceTintColor: Colors.transparent,
-        actions: [
-          Obx(() {
-            if (!controller.isLoggedIn || controller.unreadCount.value == 0) {
-              return const SizedBox.shrink();
-            }
+        body: Obx(() {
+          if (!controller.isLoggedIn) {
+            return SafeArea(
+              child: AuthRequiredState(
+                title: 'Masuk untuk melihat notifikasi',
+                message:
+                    'Kabar soal lamaran, undangan interview, dan pesan perekrut muncul di sini.',
+                icon: Iconsax.notification,
+                onLogin: controller.goToLogin,
+                onRegister: controller.goToRegister,
+              ),
+            );
+          }
 
-            return Padding(
-              padding: EdgeInsets.only(right: 6.w),
-              child: TextButton(
-                onPressed: controller.markAllRead,
-                style: TextButton.styleFrom(
-                  padding: EdgeInsets.symmetric(horizontal: 10.w),
-                  minimumSize: Size.zero,
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          return Column(
+            children: [
+              GradientHeaderBar(
+                title: 'Notifikasi',
+                subtitle: controller.unreadCount.value > 0
+                    ? '${controller.unreadCount.value} belum dibaca'
+                    : 'Semua sudah dibaca',
+                actions: [
+                  if (controller.unreadCount.value > 0)
+                    HeaderCircleButton(
+                      icon: Iconsax.tick_circle,
+                      label: 'Baca semua',
+                      onTap: controller.markAllRead,
+                    ),
+                ],
+              ),
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                  AppSpacing.gutter.w,
+                  AppSpacing.lg.h,
+                  AppSpacing.gutter.w,
+                  0,
                 ),
-                child: Text(
-                  'Baca semua',
-                  style: GoogleFonts.poppins(
-                    fontSize: 11.5.sp,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.primary,
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: _UnreadChip(
+                    active: controller.unreadOnly.value,
+                    count: controller.unreadCount.value,
+                    onTap: controller.toggleUnreadOnly,
                   ),
                 ),
               ),
-            );
-          }),
-        ],
-      ),
-      body: Obx(() {
-        if (!controller.isLoggedIn) {
-          return AuthRequiredState(
-            title: 'Masuk untuk melihat notifikasi',
-            message:
-                'Kabar soal lamaran, undangan interview, dan pesan perekrut muncul di sini.',
-            icon: Iconsax.notification,
-            onLogin: controller.goToLogin,
-            onRegister: controller.goToRegister,
+              Expanded(child: _Body()),
+            ],
           );
-        }
-
-        return Column(
-          children: [
-            Padding(
-              padding: EdgeInsets.fromLTRB(18.w, 0, 18.w, 8.h),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: _UnreadChip(
-                  active: controller.unreadOnly.value,
-                  count: controller.unreadCount.value,
-                  onTap: controller.toggleUnreadOnly,
-                ),
-              ),
-            ),
-            Expanded(child: _Body()),
-          ],
-        );
-      }),
+        }),
+      ),
     );
   }
 }

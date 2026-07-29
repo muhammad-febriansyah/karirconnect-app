@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -7,6 +8,7 @@ import 'package:iconsax/iconsax.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/values/app_colors.dart';
+import '../../../core/widgets/gradient_header.dart';
 import '../../../core/widgets/job_card.dart';
 import '../../../core/widgets/states.dart';
 import '../../../data/models/company_detail_model.dart';
@@ -18,36 +20,54 @@ class CompanyDetailView extends GetView<CompanyDetailController> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: const Text('Profil Perusahaan'),
-        backgroundColor: AppColors.background,
-        surfaceTintColor: Colors.transparent,
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle.light.copyWith(
+        statusBarColor: Colors.transparent,
       ),
-      body: Obx(() {
-        if (controller.isLoading.value) return const SectionLoader();
-
-        final error = controller.errorMessage.value;
-        if (error != null) {
-          return ListView(
-            padding: EdgeInsets.all(18.w),
-            children: [ErrorState(message: error, onRetry: controller.load)],
-          );
-        }
-
-        final detail = controller.detail.value;
-        if (detail == null) {
-          return const EmptyState(message: 'Perusahaan tidak ditemukan.');
-        }
-
-        final jobs = controller.jobs.toList();
-        final reviews = controller.reviews.toList();
-        final saved = controller.savedSlugs;
-
-        return ListView(
-          padding: EdgeInsets.fromLTRB(18.w, 8.h, 18.w, 24.h),
+      child: Scaffold(
+        backgroundColor: AppColors.background,
+        body: Column(
           children: [
+            const GradientHeaderBar(title: 'Profil Perusahaan'),
+            Expanded(child: _Body()),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _Body extends GetView<CompanyDetailController> {
+  @override
+  Widget build(BuildContext context) {
+    return Obx(() {
+      if (controller.isLoading.value) return const SectionLoader();
+
+      final error = controller.errorMessage.value;
+      if (error != null) {
+        return ListView(
+          padding: EdgeInsets.all(AppSpacing.gutter.w),
+          children: [ErrorState(message: error, onRetry: controller.load)],
+        );
+      }
+
+      final detail = controller.detail.value;
+      if (detail == null) {
+        return const EmptyState(message: 'Perusahaan tidak ditemukan.');
+      }
+
+      final jobs = controller.jobs.toList();
+      final reviews = controller.reviews.toList();
+      final saved = controller.savedSlugs;
+
+      return ListView(
+        padding: EdgeInsets.fromLTRB(
+          AppSpacing.gutter.w,
+          AppSpacing.xl.h,
+          AppSpacing.gutter.w,
+          AppSpacing.xl.h,
+        ),
+        children: [
             _Header(detail: detail),
             SizedBox(height: 14.h),
             _Facts(detail: detail),
@@ -116,8 +136,7 @@ class CompanyDetailView extends GetView<CompanyDetailController> {
             ],
           ],
         );
-      }),
-    );
+      });
   }
 }
 

@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:iconsax/iconsax.dart';
 
 import '../theme/app_theme.dart';
 import '../values/app_colors.dart';
+import 'gradient_header.dart';
 import 'states.dart';
 
-/// Chrome shared by the three profile sub-resource screens: title, add button,
-/// the loading / error / empty states, and a card per record with edit and
-/// delete actions.
+/// Chrome shared by the three profile sub-resource screens: gradient header,
+/// add button, the loading / error / empty states, and a card per record with
+/// edit and delete actions.
 class RecordListScaffold extends StatelessWidget {
   const RecordListScaffold({
     super.key,
@@ -23,9 +25,11 @@ class RecordListScaffold extends StatelessWidget {
     required this.itemBuilder,
     required this.onRetry,
     required this.onAdd,
+    this.subtitle,
   });
 
   final String title;
+  final String? subtitle;
   final String addLabel;
   final String emptyMessage;
   final IconData emptyIcon;
@@ -38,58 +42,73 @@ class RecordListScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: Text(title),
-        backgroundColor: AppColors.background,
-        surfaceTintColor: Colors.transparent,
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle.light.copyWith(
+        statusBarColor: Colors.transparent,
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: onAdd,
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
-        icon: const Icon(Iconsax.add),
-        label: Text(
-          addLabel,
-          style: GoogleFonts.poppins(
-            fontSize: 13.sp,
-            fontWeight: FontWeight.w600,
+      child: Scaffold(
+        backgroundColor: AppColors.background,
+        floatingActionButton: FloatingActionButton.extended(
+          onPressed: onAdd,
+          backgroundColor: AppColors.primary,
+          foregroundColor: Colors.white,
+          icon: const Icon(Iconsax.add),
+          label: Text(
+            addLabel,
+            style: GoogleFonts.poppins(
+              fontSize: 13.sp,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ),
-      ),
-      body: RefreshIndicator(
-        onRefresh: onRetry,
-        color: AppColors.primary,
-        child: Builder(
-          builder: (context) {
-            if (isLoading) return const SectionLoader();
+        body: Column(
+          children: [
+            GradientHeaderBar(title: title, subtitle: subtitle),
+            Expanded(
+              child: RefreshIndicator(
+                onRefresh: onRetry,
+                color: AppColors.primary,
+                child: Builder(
+                  builder: (context) {
+                    if (isLoading) return const SectionLoader();
 
-            if (errorMessage != null) {
-              return ListView(
-                padding: EdgeInsets.all(18.w),
-                children: [
-                  ErrorState(message: errorMessage!, onRetry: onRetry),
-                ],
-              );
-            }
+                    final gutter = EdgeInsets.fromLTRB(
+                      AppSpacing.gutter.w,
+                      AppSpacing.xl.h,
+                      AppSpacing.gutter.w,
+                      90.h,
+                    );
 
-            if (itemCount == 0) {
-              return ListView(
-                padding: EdgeInsets.all(18.w),
-                children: [
-                  EmptyState(icon: emptyIcon, message: emptyMessage),
-                ],
-              );
-            }
+                    if (errorMessage != null) {
+                      return ListView(
+                        padding: gutter,
+                        children: [
+                          ErrorState(message: errorMessage!, onRetry: onRetry),
+                        ],
+                      );
+                    }
 
-            return ListView.separated(
-              padding: EdgeInsets.fromLTRB(18.w, 8.h, 18.w, 90.h),
-              itemCount: itemCount,
-              separatorBuilder: (_, _) => SizedBox(height: 12.h),
-              itemBuilder: itemBuilder,
-            );
-          },
+                    if (itemCount == 0) {
+                      return ListView(
+                        padding: gutter,
+                        children: [
+                          EmptyState(icon: emptyIcon, message: emptyMessage),
+                        ],
+                      );
+                    }
+
+                    return ListView.separated(
+                      padding: gutter,
+                      itemCount: itemCount,
+                      separatorBuilder: (_, _) =>
+                          SizedBox(height: AppSpacing.md.h),
+                      itemBuilder: itemBuilder,
+                    );
+                  },
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );

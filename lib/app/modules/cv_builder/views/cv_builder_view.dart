@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:iconsax/iconsax.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/gradient_header.dart';
 import '../../../core/values/app_colors.dart';
 import '../../../core/widgets/form_fields.dart';
 import '../../../core/widgets/states.dart';
@@ -19,13 +21,17 @@ class CvBuilderView extends GetView<CvBuilderController> {
 
   @override
   Widget build(BuildContext context) {
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle.light.copyWith(
+        statusBarColor: Colors.transparent,
+      ),
+      child: _scaffold(context),
+    );
+  }
+
+  Widget _scaffold(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: const Text('CV Builder'),
-        backgroundColor: AppColors.background,
-        surfaceTintColor: Colors.transparent,
-      ),
       bottomNavigationBar: SafeArea(
         top: false,
         child: Padding(
@@ -47,7 +53,13 @@ class CvBuilderView extends GetView<CvBuilderController> {
           ),
         ),
       ),
-      body: Obx(() {
+      body: Column(
+        children: [
+          const GradientHeaderBar(
+            title: 'CV Builder',
+            subtitle: 'Susun CV profesional dari datamu',
+          ),
+          Expanded(child: Obx(() {
         if (controller.isLoading.value) return const SectionLoader();
 
         final error = controller.errorMessage.value;
@@ -150,7 +162,9 @@ class CvBuilderView extends GetView<CvBuilderController> {
             ),
           ],
         );
-      }),
+          })),
+        ],
+      ),
     );
   }
 }

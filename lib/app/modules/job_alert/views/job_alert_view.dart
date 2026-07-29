@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -7,6 +8,7 @@ import 'package:iconsax/iconsax.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/values/app_colors.dart';
+import '../../../core/widgets/gradient_header.dart';
 import '../../../core/widgets/states.dart';
 import '../../../data/models/job_alert_model.dart';
 import '../controllers/job_alert_controller.dart';
@@ -18,64 +20,81 @@ class JobAlertView extends GetView<JobAlertController> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: const Text('Job Alert'),
-        backgroundColor: AppColors.background,
-        surfaceTintColor: Colors.transparent,
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle.light.copyWith(
+        statusBarColor: Colors.transparent,
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => JobAlertFormSheet.show(context, controller),
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
-        icon: const Icon(Iconsax.add),
-        label: Text(
-          'Alert baru',
-          style: GoogleFonts.poppins(
-            fontSize: 13.sp,
-            fontWeight: FontWeight.w600,
+      child: Scaffold(
+        backgroundColor: AppColors.background,
+        floatingActionButton: FloatingActionButton.extended(
+          onPressed: () => JobAlertFormSheet.show(context, controller),
+          backgroundColor: AppColors.primary,
+          foregroundColor: Colors.white,
+          icon: const Icon(Iconsax.add),
+          label: Text(
+            'Alert baru',
+            style: GoogleFonts.poppins(
+              fontSize: 13.sp,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ),
-      ),
-      body: RefreshIndicator(
-        onRefresh: controller.load,
-        color: AppColors.primary,
-        child: Obx(() {
-          if (controller.isLoading.value) return const SectionLoader();
-
-          final error = controller.errorMessage.value;
-          if (error != null) {
-            return ListView(
-              padding: EdgeInsets.all(18.w),
-              children: [ErrorState(message: error, onRetry: controller.load)],
-            );
-          }
-
-          final alerts = controller.alerts.toList();
-          if (alerts.isEmpty) {
-            return ListView(
-              padding: EdgeInsets.all(18.w),
-              children: const [
-                EmptyState(
-                  icon: Iconsax.notification_bing,
-                  message:
-                      'Belum ada alert. Buat satu agar lowongan yang cocok dikirim otomatis.',
-                ),
-              ],
-            );
-          }
-
-          return ListView.separated(
-            padding: EdgeInsets.fromLTRB(18.w, 8.h, 18.w, 90.h),
-            itemCount: alerts.length,
-            separatorBuilder: (_, _) => SizedBox(height: 12.h),
-            itemBuilder: (context, index) => _AlertCard(
-              alert: alerts[index],
-              controller: controller,
+        body: Column(
+          children: [
+            const GradientHeaderBar(
+              title: 'Job Alert',
+              subtitle: 'Lowongan cocok dikirim otomatis',
             ),
-          );
-        }),
+            Expanded(
+              child: RefreshIndicator(
+                onRefresh: controller.load,
+                color: AppColors.primary,
+                child: Obx(() {
+                  if (controller.isLoading.value) return const SectionLoader();
+
+                  final error = controller.errorMessage.value;
+                  if (error != null) {
+                    return ListView(
+                      padding: EdgeInsets.all(AppSpacing.gutter.w),
+                      children: [
+                        ErrorState(message: error, onRetry: controller.load),
+                      ],
+                    );
+                  }
+
+                  final alerts = controller.alerts.toList();
+                  if (alerts.isEmpty) {
+                    return ListView(
+                      padding: EdgeInsets.all(AppSpacing.gutter.w),
+                      children: const [
+                        EmptyState(
+                          icon: Iconsax.notification_bing,
+                          message:
+                              'Belum ada alert. Buat satu agar lowongan yang cocok dikirim otomatis.',
+                        ),
+                      ],
+                    );
+                  }
+
+                  return ListView.separated(
+                    padding: EdgeInsets.fromLTRB(
+                      AppSpacing.gutter.w,
+                      AppSpacing.xl.h,
+                      AppSpacing.gutter.w,
+                      90.h,
+                    ),
+                    itemCount: alerts.length,
+                    separatorBuilder: (_, _) => SizedBox(height: AppSpacing.md.h),
+                    itemBuilder: (context, index) => _AlertCard(
+                      alert: alerts[index],
+                      controller: controller,
+                    ),
+                  );
+                }),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

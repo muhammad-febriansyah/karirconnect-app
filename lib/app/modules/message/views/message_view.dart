@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -7,6 +8,7 @@ import 'package:iconsax/iconsax.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/values/app_colors.dart';
+import '../../../core/widgets/gradient_header.dart';
 import '../../../core/widgets/states.dart';
 import '../../../data/models/conversation_model.dart';
 import '../controllers/message_controller.dart';
@@ -19,31 +21,42 @@ class MessageView extends GetView<MessageController> {
 
   @override
   Widget build(BuildContext context) {
-    return Obx(() {
-      final thread = controller.openThread.value;
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle.light.copyWith(
+        statusBarColor: Colors.transparent,
+      ),
+      child: Obx(() {
+        final thread = controller.openThread.value;
 
-      return PopScope(
-        canPop: thread == null,
-        onPopInvokedWithResult: (didPop, _) {
-          if (!didPop) controller.closeThread();
-        },
-        child: Scaffold(
-          backgroundColor: AppColors.background,
-          appBar: AppBar(
-            title: Text(thread?.title ?? 'Pesan'),
+        return PopScope(
+          canPop: thread == null,
+          onPopInvokedWithResult: (didPop, _) {
+            if (!didPop) controller.closeThread();
+          },
+          child: Scaffold(
             backgroundColor: AppColors.background,
-            surfaceTintColor: Colors.transparent,
-            leading: thread == null
-                ? null
-                : IconButton(
-                    onPressed: controller.closeThread,
-                    icon: const Icon(Iconsax.arrow_left_2),
-                  ),
+            body: Column(
+              children: [
+                GradientHeaderBar(
+                  title: thread?.title ?? 'Pesan',
+                  subtitle: thread == null ? 'Percakapan dengan perekrut' : null,
+                  // In a thread, back returns to the list, not out of the
+                  // screen — same as the old custom leading.
+                  onBack: thread == null
+                      ? () => Navigator.of(context).maybePop()
+                      : controller.closeThread,
+                ),
+                Expanded(
+                  child: thread == null
+                      ? const _ConversationList()
+                      : _Thread(thread: thread),
+                ),
+              ],
+            ),
           ),
-          body: thread == null ? const _ConversationList() : _Thread(thread: thread),
-        ),
-      );
-    });
+        );
+      }),
+    );
   }
 }
 

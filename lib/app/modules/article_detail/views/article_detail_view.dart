@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -7,6 +8,7 @@ import 'package:iconsax/iconsax.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/values/app_colors.dart';
+import '../../../core/widgets/gradient_header.dart';
 import '../../../core/widgets/states.dart';
 import '../controllers/article_detail_controller.dart';
 
@@ -16,31 +18,44 @@ class ArticleDetailView extends GetView<ArticleDetailController> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: const Text('Artikel'),
-        backgroundColor: AppColors.background,
-        surfaceTintColor: Colors.transparent,
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle.light.copyWith(
+        statusBarColor: Colors.transparent,
       ),
-      body: Obx(() {
-        if (controller.isLoading.value) return const SectionLoader();
+      child: Scaffold(
+        backgroundColor: AppColors.background,
+        body: Column(
+          children: [
+            const GradientHeaderBar(title: 'Artikel'),
+            Expanded(child: _Body()),
+          ],
+        ),
+      ),
+    );
+  }
+}
 
-        final error = controller.errorMessage.value;
-        if (error != null) {
-          return ListView(
-            padding: EdgeInsets.all(18.w),
-            children: [ErrorState(message: error, onRetry: controller.load)],
-          );
-        }
+class _Body extends GetView<ArticleDetailController> {
+  @override
+  Widget build(BuildContext context) {
+    return Obx(() {
+      if (controller.isLoading.value) return const SectionLoader();
 
-        final detail = controller.detail.value;
-        if (detail == null) {
-          return const EmptyState(
-            icon: Iconsax.book_1,
-            message: 'Artikel tidak ditemukan.',
-          );
-        }
+      final error = controller.errorMessage.value;
+      if (error != null) {
+        return ListView(
+          padding: EdgeInsets.all(AppSpacing.gutter.w),
+          children: [ErrorState(message: error, onRetry: controller.load)],
+        );
+      }
+
+      final detail = controller.detail.value;
+      if (detail == null) {
+        return const EmptyState(
+          icon: Iconsax.book_1,
+          message: 'Artikel tidak ditemukan.',
+        );
+      }
 
         final resource = detail.resource;
         final body = Formatters.richTextToPlain(detail.body);
@@ -167,7 +182,6 @@ class ArticleDetailView extends GetView<ArticleDetailController> {
             ),
           ],
         );
-      }),
-    );
+      });
   }
 }

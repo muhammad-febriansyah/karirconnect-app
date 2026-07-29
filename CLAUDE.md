@@ -181,9 +181,20 @@ The web uses Inter; this app uses Poppins. Only the palette is shared.
 
 `GetMaterialApp.scrollBehavior` is `AppScrollBehavior` (`core/theme/app_scroll_behavior.dart`) — **bouncing on every platform, no scrollbar, no Android glow**, set once instead of per widget. Do **not** pass an explicit `physics:` to a scroll view; an explicit one shadows this and loses the bounce on that screen only (that is why `home_view`'s `CustomScrollView` no longer sets `AlwaysScrollableScrollPhysics`). The behavior already composes `AlwaysScrollableScrollPhysics`, so a short/empty list still drags for `RefreshIndicator`.
 
-### The five tabs share one header
+### Every screen wears the gradient header
 
-Beranda, Lowongan, AI Karier, Lamaran and Profil all open with a `GradientHeader`, so the bottom-nav set reads as one app. Lamaran and Profil were plain white `AppBar`s until they were moved onto the shell; Profil's identity block used to be a gradient card stacked *inside* a white AppBar page — it is now the header itself. Signed-out Lamaran/Profil skip the header and show a full-screen `AuthRequiredState`.
+There are **no plain white `AppBar`s left** in `lib/app/modules`. `core/widgets/gradient_header.dart` supplies the whole family:
+
+- `GradientHeader` — freeform gradient block, used by the five tabs (each lays out its own title/search/identity child).
+- `GradientHeaderBar` — the pre-laid header for **pushed** pages: back circle + title + optional subtitle + optional trailing `HeaderCircleButton` actions + optional `bottom` (a search field, a stat strip). Every `Get.toNamed` destination uses this instead of an `AppBar`.
+- `HeaderCircleButton` — the translucent-white circle for header controls (back, save, "baca semua", CV Builder), sized to 44pt.
+- `HeaderSheet` / `HeaderSearchField` / `FilterChipButton` — as before.
+
+Conversion pattern for a pushed page: drop `appBar:`, wrap the body in `Column(children: [GradientHeaderBar(...), Expanded(<body>)])`, and keep any `bottomNavigationBar` on the `Scaffold`. Where the body was `body: Obx(() {...})`, it usually moved into a private `_Body extends GetView<TheController>` so the `Obx` stays intact. `record_list_scaffold.dart` carries this for education / work-experience / certification in one place.
+
+Tabs: Beranda, Lowongan, AI Karier, Lamaran, Profil. Lamaran and Profil were white `AppBar`s until moved onto the shell; Profil's identity block used to be a gradient card stacked *inside* a white AppBar page — it is now the header itself. Signed-out Lamaran/Profil/Notifikasi skip the header and show a full-screen `AuthRequiredState`.
+
+`message` keeps a dynamic header: in a thread the title is the counterpart and Back calls `controller.closeThread` (returns to the list) rather than popping the route.
 
 ### Surfaces: no borders, no shadows
 

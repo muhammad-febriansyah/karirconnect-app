@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -7,6 +8,7 @@ import 'package:iconsax/iconsax.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/values/app_colors.dart';
+import '../../../core/widgets/gradient_header.dart';
 import '../../../core/widgets/states.dart';
 import '../../../data/models/salary_insight_model.dart';
 import '../controllers/salary_insight_controller.dart';
@@ -17,22 +19,33 @@ class SalaryInsightView extends GetView<SalaryInsightController> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: const Text('Insight Gaji'),
-        backgroundColor: AppColors.background,
-        surfaceTintColor: Colors.transparent,
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle.light.copyWith(
+        statusBarColor: Colors.transparent,
       ),
-      body: RefreshIndicator(
-        onRefresh: controller.load,
-        color: AppColors.primary,
-        child: ListView(
-          padding: EdgeInsets.fromLTRB(18.w, 4.h, 18.w, 28.h),
+      child: Scaffold(
+        backgroundColor: AppColors.background,
+        body: Column(
           children: [
-            const _Filters(),
-            SizedBox(height: 16.h),
-            Obx(() {
+            const GradientHeaderBar(
+              title: 'Insight Gaji',
+              subtitle: 'Kisaran gaji per posisi dan industri',
+            ),
+            Expanded(
+              child: RefreshIndicator(
+                onRefresh: controller.load,
+                color: AppColors.primary,
+                child: ListView(
+                  padding: EdgeInsets.fromLTRB(
+                    AppSpacing.gutter.w,
+                    AppSpacing.lg.h,
+                    AppSpacing.gutter.w,
+                    AppSpacing.section.h,
+                  ),
+                  children: [
+                    const _Filters(),
+                    SizedBox(height: AppSpacing.lg.h),
+                    Obx(() {
               if (controller.isLoading.value) return const SectionLoader();
 
               final error = controller.errorMessage.value;
@@ -75,9 +88,13 @@ class SalaryInsightView extends GetView<SalaryInsightController> {
                       (company) => _CompanyTile(company: company),
                     ),
                   ],
-                ],
-              );
-            }),
+                        ],
+                      );
+                    }),
+                  ],
+                ),
+              ),
+            ),
           ],
         ),
       ),

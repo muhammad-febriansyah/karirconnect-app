@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -6,6 +7,7 @@ import 'package:iconsax/iconsax.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/values/app_colors.dart';
+import '../../../core/widgets/gradient_header.dart';
 import '../../../core/widgets/job_card.dart';
 import '../../../core/widgets/states.dart';
 import '../../../data/models/recommendation_model.dart';
@@ -18,70 +20,89 @@ class RecommendationView extends GetView<RecommendationController> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: const Text('Rekomendasi'),
-        backgroundColor: AppColors.background,
-        surfaceTintColor: Colors.transparent,
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle.light.copyWith(
+        statusBarColor: Colors.transparent,
       ),
-      body: RefreshIndicator(
-        onRefresh: controller.load,
-        color: AppColors.primary,
-        child: Obx(() {
-          if (controller.isLoading.value) return const SectionLoader();
+      child: Scaffold(
+        backgroundColor: AppColors.background,
+        body: Column(
+          children: [
+            const GradientHeaderBar(
+              title: 'Rekomendasi',
+              subtitle: 'Lowongan yang cocok dengan profilmu',
+            ),
+            Expanded(
+              child: RefreshIndicator(
+                onRefresh: controller.load,
+                color: AppColors.primary,
+                child: Obx(() {
+                  if (controller.isLoading.value) return const SectionLoader();
 
-          final error = controller.errorMessage.value;
-          if (error != null) {
-            return ListView(
-              padding: EdgeInsets.all(18.w),
-              children: [ErrorState(message: error, onRetry: controller.load)],
-            );
-          }
+                  final gutter = EdgeInsets.fromLTRB(
+                    AppSpacing.gutter.w,
+                    AppSpacing.xl.h,
+                    AppSpacing.gutter.w,
+                    AppSpacing.xl.h,
+                  );
 
-          final items = controller.items.toList();
-          if (items.isEmpty) {
-            return ListView(
-              padding: EdgeInsets.all(18.w),
-              children: [
-                EmptyState(
-                  icon: Iconsax.magic_star,
-                  message: controller.profileCompletion.value < 60
-                      ? 'Profilmu baru ${controller.profileCompletion.value}% lengkap. Lengkapi profil agar rekomendasi lebih akurat.'
-                      : 'Belum ada rekomendasi baru. Cek lagi nanti.',
-                ),
-              ],
-            );
-          }
+                  final error = controller.errorMessage.value;
+                  if (error != null) {
+                    return ListView(
+                      padding: gutter,
+                      children: [
+                        ErrorState(message: error, onRetry: controller.load),
+                      ],
+                    );
+                  }
 
-          final saved = controller.savedSlugs;
+                  final items = controller.items.toList();
+                  if (items.isEmpty) {
+                    return ListView(
+                      padding: gutter,
+                      children: [
+                        EmptyState(
+                          icon: Iconsax.magic_star,
+                          message: controller.profileCompletion.value < 60
+                              ? 'Profilmu baru ${controller.profileCompletion.value}% lengkap. Lengkapi profil agar rekomendasi lebih akurat.'
+                              : 'Belum ada rekomendasi baru. Cek lagi nanti.',
+                        ),
+                      ],
+                    );
+                  }
 
-          return ListView.separated(
-            padding: EdgeInsets.fromLTRB(18.w, 8.h, 18.w, 24.h),
-            itemCount: items.length,
-            separatorBuilder: (_, _) => SizedBox(height: 14.h),
-            itemBuilder: (context, index) {
-              final item = items[index];
+                  final saved = controller.savedSlugs;
 
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  JobCard(
-                    job: item.job,
-                    isSaved: saved.contains(item.job.slug),
-                    onTap: () => controller.openJob(item.job),
-                    onSave: () => controller.toggleSave(item.job),
-                  ),
-                  SizedBox(height: 8.h),
-                  _MatchPanel(
-                    item: item,
-                    onDismiss: () => controller.dismiss(item),
-                  ),
-                ],
-              );
-            },
-          );
-        }),
+                  return ListView.separated(
+                    padding: gutter,
+                    itemCount: items.length,
+                    separatorBuilder: (_, _) => SizedBox(height: AppSpacing.lg.h),
+                    itemBuilder: (context, index) {
+                      final item = items[index];
+
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          JobCard(
+                            job: item.job,
+                            isSaved: saved.contains(item.job.slug),
+                            onTap: () => controller.openJob(item.job),
+                            onSave: () => controller.toggleSave(item.job),
+                          ),
+                          SizedBox(height: AppSpacing.sm.h),
+                          _MatchPanel(
+                            item: item,
+                            onDismiss: () => controller.dismiss(item),
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                }),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
