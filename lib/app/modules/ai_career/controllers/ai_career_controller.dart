@@ -66,6 +66,7 @@ class AiCareerController extends GetxController {
       title: 'Skill Assessment',
       description: 'Uji keahlianmu dan tampilkan hasilnya ke perekrut.',
       endpoint: 'GET /skill-assessments',
+      route: Routes.SKILL_ASSESSMENT,
     ),
   ];
 
