@@ -1,0 +1,7 @@
+include: package:flutter_lints/flutter.yaml
+linter:
+  rules:
+    # get_cli generates SCREAMING_CAPS route constants in
+    # lib/app/routes/app_routes.dart and regenerates the file on every
+    # `get create page:*`, so renaming them is not an option.
+    constant_identifier_names: false
