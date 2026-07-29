@@ -56,6 +56,9 @@ import '../modules/register/bindings/register_binding.dart';
 import '../modules/register/views/register_view.dart';
 import '../modules/salary_insight/bindings/salary_insight_binding.dart';
 import '../modules/salary_insight/views/salary_insight_view.dart';
+import '../modules/ai_interview/bindings/ai_interview_binding.dart';
+import '../modules/ai_interview/views/ai_interview_view.dart';
+import '../modules/ai_interview/views/interview_run_view.dart';
 import '../modules/skill_assessment/bindings/skill_assessment_binding.dart';
 import '../modules/skill_assessment/views/assessment_quiz_view.dart';
 import '../modules/skill_assessment/views/skill_assessment_view.dart';
@@ -138,6 +141,16 @@ class AppPages {
       name: _Paths.SKILL_ASSESSMENT_QUIZ,
       page: () => const AssessmentQuizView(),
       binding: AssessmentQuizBinding(),
+    ),
+    GetPage(
+      name: _Paths.AI_INTERVIEW,
+      page: () => const AiInterviewView(),
+      binding: AiInterviewBinding(),
+    ),
+    GetPage(
+      name: _Paths.AI_INTERVIEW_RUN,
+      page: () => const InterviewRunView(),
+      binding: InterviewRunBinding(),
     ),
     GetPage(
       name: _Paths.COMPANY_BROWSE,
