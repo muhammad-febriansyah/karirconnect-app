@@ -13,6 +13,7 @@ class AiFeature {
     required this.title,
     required this.description,
     required this.endpoint,
+    this.route,
   });
 
   final IconData icon;
@@ -22,6 +23,10 @@ class AiFeature {
   /// The `api/v1` route this feature will call once its screen exists. Kept
   /// here so the hub documents what is already available server-side.
   final String endpoint;
+
+  /// App route for the features that have a screen; `null` still toasts
+  /// "belum tersedia".
+  final String? route;
 }
 
 class AiCareerController extends GetxController {
@@ -47,12 +52,14 @@ class AiCareerController extends GetxController {
       title: 'Career Coach',
       description: 'Tanya jawab soal karier dengan pendamping AI.',
       endpoint: 'POST /career-coach',
+      route: Routes.CAREER_COACH,
     ),
     AiFeature(
       icon: Iconsax.edit_2,
       title: 'CV Builder',
       description: 'Susun CV profesional langsung dari data profilmu.',
       endpoint: 'GET /cv-builder',
+      route: Routes.CV_BUILDER,
     ),
     AiFeature(
       icon: Iconsax.medal_star,
@@ -72,7 +79,13 @@ class AiCareerController extends GetxController {
       return;
     }
 
-    AppToast.info('${feature.title} belum tersedia di aplikasi.');
+    final route = feature.route;
+    if (route == null) {
+      AppToast.info('${feature.title} belum tersedia di aplikasi.');
+      return;
+    }
+
+    Get.toNamed(route);
   }
 
   void goToLogin() => Get.toNamed(Routes.LOGIN);

@@ -36,6 +36,8 @@ import '../modules/jobs/bindings/jobs_binding.dart';
 import '../modules/jobs/views/jobs_view.dart';
 import '../modules/login/bindings/login_binding.dart';
 import '../modules/login/views/login_view.dart';
+import '../modules/career_coach/bindings/career_coach_binding.dart';
+import '../modules/career_coach/views/career_coach_view.dart';
 import '../modules/message/bindings/message_binding.dart';
 import '../modules/message/views/message_view.dart';
 import '../modules/notification/bindings/notification_binding.dart';
@@ -158,6 +160,11 @@ class AppPages {
       name: _Paths.MESSAGE,
       page: () => const MessageView(),
       binding: MessageBinding(),
+    ),
+    GetPage(
+      name: _Paths.CAREER_COACH,
+      page: () => const CareerCoachView(),
+      binding: CareerCoachBinding(),
     ),
     GetPage(
       name: _Paths.JOB_DETAIL,
