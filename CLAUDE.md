@@ -196,6 +196,16 @@ Tabs: Beranda, Lowongan, AI Karier, Lamaran, Profil. Lamaran and Profil were whi
 
 `message` keeps a dynamic header: in a thread the title is the counterpart and Back calls `controller.closeThread` (returns to the list) rather than popping the route.
 
+### Bottom sheets
+
+Every bottom sheet shares chrome through `core/widgets/form_fields.dart`:
+
+- `SheetContainer` — the rounded top (same radius as `HeaderSheet`), the `SheetGrabber`, safe-area inset and gutter. The one hairline the borderless system keeps is the grab handle, because a sheet needs a grab affordance.
+- `FormSheetShell` — `SheetContainer` + title/subtitle + a scrolling body + a full-width submit button. Used by every form sheet (job-alert, reschedule, education / work-experience / certification, CV-builder entries).
+- `SheetShell` (`home/views/widgets/`) — `SheetContainer` + a title row for list/filter sheets (province picker, filter).
+
+`apply_sheet` uses `SheetContainer` directly rather than `FormSheetShell` because its submit button is an `Obx` with a loading spinner that the shell's plain button can't express. Sheet filter chips are fill-swap (`surfaceSoft`/`primary`) like everywhere else. No sheet hand-rolls its grabber or radius any more.
+
 ### Surfaces: no borders, no shadows
 
 Cards separate from the page by a **tonal step**, not by a stroke or an elevation. The ladder is `background` (#FFFFFF) < `surfaceSoft` (#F2F6FB) < `muted`, and it must stay in that order or the separation collapses. Anything nested inside a `surfaceSoft` card — chips, logo tiles — inverts to `surfaceInset` (white).

@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/values/app_colors.dart';
+import '../../../../core/widgets/form_fields.dart';
 import '../../../../data/models/job_detail_model.dart';
 import '../../controllers/job_detail_controller.dart';
 
@@ -40,39 +41,21 @@ class ApplySheet extends StatelessWidget {
   Widget build(BuildContext context) {
     final questions = controller.detail.value?.screeningQuestions ?? const [];
 
-    return Container(
-      constraints: BoxConstraints(maxHeight: 0.88.sh),
-      decoration: BoxDecoration(
-        color: AppColors.background,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(22.r)),
-      ),
-      padding: EdgeInsets.fromLTRB(20.w, 10.h, 20.w, 0),
-      child: SafeArea(
-        top: false,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
-              child: Container(
-                width: 38.w,
-                height: 4.h,
-                decoration: BoxDecoration(
-                  color: AppColors.border,
-                  borderRadius: BorderRadius.circular(4.r),
-                ),
-              ),
-            ),
-            SizedBox(height: 16.h),
+    return SheetContainer(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
             Text(
               'Lamar lowongan',
               style: GoogleFonts.poppins(
-                fontSize: 15.sp,
+                fontSize: 16.sp,
                 fontWeight: FontWeight.w700,
                 color: AppColors.brandNavy,
+                letterSpacing: -0.2,
               ),
             ),
-            SizedBox(height: 4.h),
+            SizedBox(height: 3.h),
             Text(
               'CV utama dari profilmu akan dilampirkan otomatis.',
               style: GoogleFonts.poppins(
@@ -80,7 +63,7 @@ class ApplySheet extends StatelessWidget {
                 color: AppColors.mutedForeground,
               ),
             ),
-            SizedBox(height: 16.h),
+            SizedBox(height: AppSpacing.lg.h),
             Flexible(
               child: SingleChildScrollView(
                 child: Column(
@@ -165,9 +148,8 @@ class ApplySheet extends StatelessWidget {
                 ),
               ),
             ),
-            SizedBox(height: 12.h),
-          ],
-        ),
+            SizedBox(height: AppSpacing.md.h),
+        ],
       ),
     );
   }
@@ -299,7 +281,7 @@ class _Choices extends StatelessWidget {
         final active = selected.contains(option);
 
         return Material(
-          color: active ? AppColors.primary : AppColors.muted,
+          color: active ? AppColors.primary : AppColors.surfaceSoft,
           borderRadius: BorderRadius.circular(AppRadius.control),
           child: InkWell(
             onTap: () => onTap(option),

@@ -138,6 +138,72 @@ class ChipPicker extends StatelessWidget {
 }
 
 /// Bottom-sheet chrome for the add/edit forms of the profile sub-resources.
+/// The chrome every bottom sheet in the app shares: a grab handle, the rounded
+/// top, the safe-area inset and the standard gutter. Pulled out so the two
+/// shells and the hand-rolled sheets round and pad identically.
+class SheetContainer extends StatelessWidget {
+  const SheetContainer({
+    super.key,
+    required this.child,
+    this.maxHeightFactor = 0.88,
+  });
+
+  final Widget child;
+
+  /// Fraction of screen height the sheet may grow to before its body scrolls.
+  final double maxHeightFactor;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      constraints: BoxConstraints(maxHeight: maxHeightFactor.sh),
+      decoration: BoxDecoration(
+        color: AppColors.background,
+        // Matches HeaderSheet's top radius so sheets and the page sheet round
+        // the same way.
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(AppRadius.card + 8),
+        ),
+      ),
+      padding: EdgeInsets.fromLTRB(
+        AppSpacing.gutter.w,
+        AppSpacing.md.h,
+        AppSpacing.gutter.w,
+        0,
+      ),
+      child: SafeArea(
+        top: false,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [const SheetGrabber(), child],
+        ),
+      ),
+    );
+  }
+}
+
+/// The drag handle. A short bar, not a stroke — this is the one hairline the
+/// borderless system keeps, because a sheet needs a grab affordance.
+class SheetGrabber extends StatelessWidget {
+  const SheetGrabber({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Container(
+        width: 40.w,
+        height: 4.h,
+        margin: EdgeInsets.only(bottom: AppSpacing.lg.h),
+        decoration: BoxDecoration(
+          color: AppColors.mutedForeground.withValues(alpha: 0.28),
+          borderRadius: BorderRadius.circular(4.r),
+        ),
+      ),
+    );
+  }
+}
+
 class FormSheetShell extends StatelessWidget {
   const FormSheetShell({
     super.key,
@@ -145,60 +211,54 @@ class FormSheetShell extends StatelessWidget {
     required this.child,
     required this.submitLabel,
     required this.onSubmit,
+    this.subtitle,
   });
 
   final String title;
+  final String? subtitle;
   final Widget child;
   final String submitLabel;
   final VoidCallback onSubmit;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      constraints: BoxConstraints(maxHeight: 0.88.sh),
-      decoration: BoxDecoration(
-        color: AppColors.background,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(22.r)),
-      ),
-      padding: EdgeInsets.fromLTRB(20.w, 10.h, 20.w, 0),
-      child: SafeArea(
-        top: false,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
-              child: Container(
-                width: 38.w,
-                height: 4.h,
-                decoration: BoxDecoration(
-                  color: AppColors.border,
-                  borderRadius: BorderRadius.circular(4.r),
-                ),
-              ),
+    return SheetContainer(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: GoogleFonts.poppins(
+              fontSize: 16.sp,
+              fontWeight: FontWeight.w700,
+              color: AppColors.brandNavy,
+              letterSpacing: -0.2,
             ),
-            SizedBox(height: 16.h),
+          ),
+          if (subtitle != null) ...[
+            SizedBox(height: 3.h),
             Text(
-              title,
+              subtitle!,
               style: GoogleFonts.poppins(
-                fontSize: 15.sp,
-                fontWeight: FontWeight.w700,
-                color: AppColors.brandNavy,
+                fontSize: 11.5.sp,
+                height: 1.4,
+                color: AppColors.mutedForeground,
               ),
             ),
-            SizedBox(height: 14.h),
-            Flexible(child: SingleChildScrollView(child: child)),
-            SizedBox(height: 12.h),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: onSubmit,
-                child: Text(submitLabel),
-              ),
-            ),
-            SizedBox(height: 12.h),
           ],
-        ),
+          SizedBox(height: AppSpacing.lg.h),
+          Flexible(child: SingleChildScrollView(child: child)),
+          SizedBox(height: AppSpacing.md.h),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: onSubmit,
+              child: Text(submitLabel),
+            ),
+          ),
+          SizedBox(height: AppSpacing.md.h),
+        ],
       ),
     );
   }
