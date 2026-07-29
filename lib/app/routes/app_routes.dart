@@ -1,0 +1,70 @@
+part of 'app_pages.dart';
+// DO NOT EDIT. This is code generated via package:get_cli/get_cli.dart
+
+abstract class Routes {
+  Routes._();
+  static const HOME = _Paths.HOME;
+  static const DASHBOARD = _Paths.DASHBOARD;
+  static const SPLASH = _Paths.SPLASH;
+  static const ONBOARDING = _Paths.ONBOARDING;
+  static const JOBS = _Paths.JOBS;
+  static const AI_CAREER = _Paths.AI_CAREER;
+  static const APPLICATIONS = _Paths.APPLICATIONS;
+  static const PROFILE = _Paths.PROFILE;
+  static const LOGIN = _Paths.LOGIN;
+  static const REGISTER = _Paths.REGISTER;
+  static const SALARY_INSIGHT = _Paths.SALARY_INSIGHT;
+  static const COMPANY_BROWSE = _Paths.COMPANY_BROWSE;
+  static const CAREER_RESOURCE = _Paths.CAREER_RESOURCE;
+  static const SAVED_JOB = _Paths.SAVED_JOB;
+  static const RECOMMENDATION = _Paths.RECOMMENDATION;
+  static const JOB_ALERT = _Paths.JOB_ALERT;
+  static const INTERVIEW = _Paths.INTERVIEW;
+  static const MESSAGE = _Paths.MESSAGE;
+  static const JOB_DETAIL = _Paths.JOB_DETAIL;
+  static const APPLICATION_DETAIL = _Paths.APPLICATION_DETAIL;
+  static const PROFILE_EDIT = _Paths.PROFILE_EDIT;
+  static const EDUCATION = _Paths.EDUCATION;
+  static const WORK_EXPERIENCE = _Paths.WORK_EXPERIENCE;
+  static const CERTIFICATION = _Paths.CERTIFICATION;
+  static const COMPANY_DETAIL = _Paths.COMPANY_DETAIL;
+  static const ARTICLE_DETAIL = _Paths.ARTICLE_DETAIL;
+  static const NOTIFICATION = _Paths.NOTIFICATION;
+  static const CV = _Paths.CV;
+  static const CV_BUILDER = _Paths.CV_BUILDER;
+  static const PROFILE_ONBOARDING = _Paths.PROFILE_ONBOARDING;
+}
+
+abstract class _Paths {
+  _Paths._();
+  static const HOME = '/home';
+  static const DASHBOARD = '/dashboard';
+  static const SPLASH = '/splash';
+  static const ONBOARDING = '/onboarding';
+  static const JOBS = '/jobs';
+  static const AI_CAREER = '/ai-career';
+  static const APPLICATIONS = '/applications';
+  static const PROFILE = '/profile';
+  static const LOGIN = '/login';
+  static const REGISTER = '/register';
+  static const SALARY_INSIGHT = '/salary-insight';
+  static const COMPANY_BROWSE = '/company-browse';
+  static const CAREER_RESOURCE = '/career-resource';
+  static const SAVED_JOB = '/saved-job';
+  static const RECOMMENDATION = '/recommendation';
+  static const JOB_ALERT = '/job-alert';
+  static const INTERVIEW = '/interview';
+  static const MESSAGE = '/message';
+  static const JOB_DETAIL = '/job-detail';
+  static const APPLICATION_DETAIL = '/application-detail';
+  static const PROFILE_EDIT = '/profile-edit';
+  static const EDUCATION = '/education';
+  static const WORK_EXPERIENCE = '/work-experience';
+  static const CERTIFICATION = '/certification';
+  static const COMPANY_DETAIL = '/company-detail';
+  static const ARTICLE_DETAIL = '/article-detail';
+  static const NOTIFICATION = '/notification';
+  static const CV = '/cv';
+  static const CV_BUILDER = '/cv-builder';
+  static const PROFILE_ONBOARDING = '/profile-onboarding';
+}
